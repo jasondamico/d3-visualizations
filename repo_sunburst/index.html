@@ -49,6 +49,15 @@
         function createVisualization(json) {
             var nodes = partition(json);
 
+            // Retrieves height of entire tree
+            var treeHeight = d3.max(nodes, function(d) {
+                return d.depth;
+            })
+
+            directoryColorScale = d3.scaleLinear()
+                .domain([0, treeHeight])
+                .range(["#bcd4eb", "#5a95cd"])
+
             // Path creation
             var path = svg.append("g")
                 .selectAll("path")
@@ -61,7 +70,7 @@
                 .join("path")
                     .attr("display", function(d) { return d.depth ? null : "none"; })
                     .attr("d", d => arc(d))
-                    .attr("fill", d => color(d.data.name))
+                    .attr("fill", d => (d.data.value === undefined) ? directoryColorScale(d.depth) : "#ec8b32")
                     .style("opacity", 1)
 
         };
