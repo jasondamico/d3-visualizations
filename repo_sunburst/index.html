@@ -6,6 +6,62 @@
 
 <body>
     <script type="text/javascript">
+        // Retrieval of tree structure from a given GitHub repo
+        d3.json("https://api.github.com/repos/jasondamico/pgov-cover-sheet-reader/git/trees/main?recursive=true").then(function(json) {
+            root = {
+                name: "root",
+                children: []
+            }
+
+            // Cleaning JSON for insertion into hierarchy structure
+            for (var i = 0; i < json.tree.length; i++) {
+                var obj = json.tree[i]
+                var dirs = obj.path.split("/")
+                var currentLevel = root
+
+                // Loop over all directories in path
+                for (var j = 0; j < dirs.length; j++) {
+                    dir = dirs[j];
+                    childrenNames = [];
+
+                    dirIndex = 0;
+
+                    // Stops when dirIndex is out of range (directory not found) or directory found in current index
+                    while (dirIndex < currentLevel.children.length && currentLevel.children[dirIndex].name !== dir) {
+                        dirIndex++;
+                    }
+
+                    if (dirIndex === currentLevel.children.length) {
+                        // Assertion: directory not found in children; must be created
+                        var newObject = {
+                            name: dir
+                        }
+
+                        if (obj.type === "blob") {
+                            // Assertion: this is a file
+                            newObject["value"] = obj.size;
+                        } else {
+                            // Assertion: this is a directory
+                            newObject["children"] = [];
+                        }
+
+                        currentLevel.children.push(newObject);
+
+                        currentLevel = newObject;
+                    } else {
+                        // Assertion: directory is in children
+
+                        // Check to make sure that we are not at terminal point of directory path (error would be raised if so if file is last item in path)
+                        if (j !== dirs.length - 1) {
+                            currentLevel = currentLevel.children[dirIndex]
+                        }
+                    }
+                }
+            }
+
+            createVisualization(root);
+        })
+
         // Dimensions of sunburst
         var width = 750;
         var height = 600;
@@ -42,7 +98,7 @@
 
         // Retrieve hierarchy JSON, create visualization from it
         d3.json("https://raw.githubusercontent.com/d3/d3-hierarchy/main/test/data/flare.json").then(function(json) {
-            createVisualization(json);
+            // createVisualization(json);
         });
 
         // Main function to draw and set up the visualization, once we have the data.
