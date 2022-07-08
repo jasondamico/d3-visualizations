@@ -128,7 +128,24 @@
                     .attr("d", d => arc(d))
                     .attr("fill", d => (d.data.value === undefined) ? directoryColorScale(d.depth) : "#ec8b32")
                     .style("opacity", 1)
+                    .on("mouseover", mouseOver)
+                    .on("mouseout", mouseOut);
 
+            function mouseOver(e, d) {
+                // Place text on top of hovered element (template: https://plnkr.co/edit/SvDlDUvM2UgkILkxyfxI?p=preview&preview)
+                d3.select(this.parentNode).append("text")
+                    .attr("class", "text-label")
+                    .style("text-anchor", "middle")
+                    .style("font-size", 17)
+                    .style("fill", "#222")
+                    .attr("transform", () => `translate(${ arc.centroid(d) })`)
+                    .text(() =>  d.data.name)
+            }
+
+            function mouseOut(e, d) {
+                // Remove text label for the formerly hovered element
+                d3.selectAll(".text-label").remove();
+            }
         };
     </script>
 </body>
