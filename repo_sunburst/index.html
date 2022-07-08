@@ -8,56 +8,7 @@
     <script type="text/javascript">
         // Retrieval of tree structure from a given GitHub repo
         d3.json("https://api.github.com/repos/jasondamico/pgov-cover-sheet-reader/git/trees/main?recursive=true").then(function(json) {
-            root = {
-                name: "root",
-                children: []
-            }
-
-            // Cleaning JSON for insertion into hierarchy structure
-            for (var i = 0; i < json.tree.length; i++) {
-                var obj = json.tree[i]
-                var dirs = obj.path.split("/")
-                var currentLevel = root
-
-                // Loop over all directories in path
-                for (var j = 0; j < dirs.length; j++) {
-                    dir = dirs[j];
-                    childrenNames = [];
-
-                    dirIndex = 0;
-
-                    // Stops when dirIndex is out of range (directory not found) or directory found in current index
-                    while (dirIndex < currentLevel.children.length && currentLevel.children[dirIndex].name !== dir) {
-                        dirIndex++;
-                    }
-
-                    if (dirIndex === currentLevel.children.length) {
-                        // Assertion: directory not found in children; must be created
-                        var newObject = {
-                            name: dir
-                        }
-
-                        if (obj.type === "blob") {
-                            // Assertion: this is a file
-                            newObject["value"] = obj.size;
-                        } else {
-                            // Assertion: this is a directory
-                            newObject["children"] = [];
-                        }
-
-                        currentLevel.children.push(newObject);
-
-                        currentLevel = newObject;
-                    } else {
-                        // Assertion: directory is in children
-
-                        // Check to make sure that we are not at terminal point of directory path (error would be raised if so if file is last item in path)
-                        if (j !== dirs.length - 1) {
-                            currentLevel = currentLevel.children[dirIndex]
-                        }
-                    }
-                }
-            }
+            root = getCleanedGitHubJSON(json);
 
             createVisualization(root);
         })
@@ -96,10 +47,68 @@
             .domain(["home", "product", "search", "account", "other", "end"])
             .range(["#5d85cf", "#7c6561", "#da7847", "#6fb971", "#9e70cf", "#bbbbbb"]);
 
-        // Retrieve hierarchy JSON, create visualization from it
-        d3.json("https://raw.githubusercontent.com/d3/d3-hierarchy/main/test/data/flare.json").then(function(json) {
-            // createVisualization(json);
-        });
+        /**
+         * Returns a cleaned version of the JSON data retrieved from accessing a GitHub repository tree. Returned JSON object begins with a root (the project folder) and holds the hierarchy of the tree as nested objects and arrays (stored as children).
+         *
+         * @param (Object) json Raw JSON returned from the GitHub API's tree endpoint.
+         * @return (Object)     Refactored version of the passed JSON object that is in a hierarchical structure.
+         */
+        function getCleanedGitHubJSON(json) {
+            root = {
+                name: "root",
+                children: []
+            }
+
+            for (var i = 0; i < json.tree.length; i++) {
+                var obj = json.tree[i];
+                var dirs = obj.path.split("/");     // directories split by "/" in path variable
+
+                var currentLevel = root;
+
+                // Loop over all directories/files in path
+                for (var j = 0; j < dirs.length; j++) {
+                    dir = dirs[j];
+                    childrenNames = [];
+
+                    dirIndex = 0;
+
+                    // Stops when dirIndex is out of range (directory/file not found) or directory found in current index
+                    while (dirIndex < currentLevel.children.length && currentLevel.children[dirIndex].name !== dir) {
+                        dirIndex++;
+                    }
+
+                    if (dirIndex === currentLevel.children.length) {
+                        // Assertion: directory/file not found in children; must be created
+                        var newObject = {
+                            name: dir
+                        }
+
+                        if (obj.type === "blob") {
+                            // Assertion: object is a file
+                            newObject["value"] = obj.size;
+                        } else {
+                            // Assertion: object is a directory
+                            newObject["children"] = [];
+                        }
+
+                        currentLevel.children.push(newObject);
+
+                        // Update current level for next loop
+                        currentLevel = newObject;
+                    } else {
+                        // Assertion: directory is in children
+
+                        // Check to make sure that we are not at terminal point of directory path (error would be raised if so if file is last item in path)
+                        if (j !== dirs.length - 1) {
+                            // Update current level for next loop
+                            currentLevel = currentLevel.children[dirIndex];
+                        }
+                    }
+                }
+            }
+
+            return root;
+        }
 
         // Main function to draw and set up the visualization, once we have the data.
         function createVisualization(json) {
