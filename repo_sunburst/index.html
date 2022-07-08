@@ -1,0 +1,71 @@
+<html>
+<head>
+    <script src="http://d3js.org/d3.v6.min.js" charset="utf-8"></script>
+    <!-- Sunburst template: https://bl.ocks.org/kerryrodden/7090426 and https://observablehq.com/@kerryrodden/sequences-sunburst -->
+</head>
+
+<body>
+    <script type="text/javascript">
+        // Dimensions of sunburst
+        var width = 750;
+        var height = 600;
+        var radius = Math.min(width, height) / 2;
+
+        // Initialize SVG element for visualization
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("id", "container")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        // Define partition function for passed data
+        var partition = data => d3.partition()
+            .size([2 * Math.PI, radius * radius])(
+                d3.hierarchy(data)
+                    .sum(d => d.value)
+                    .sort((a, b) => b.value - a.value)
+            );
+
+        // Arc function, which assumes a path object will be passed to it
+        var arc = d3.arc()
+            .startAngle(d => d.x0)
+            .endAngle(d => d.x1)
+            .innerRadius(d => Math.sqrt(d.y0))
+            .outerRadius(d => Math.sqrt(d.y1) - 1)
+            .padAngle(.001);
+
+        var color = d3
+            .scaleOrdinal()
+            .domain(["home", "product", "search", "account", "other", "end"])
+            .range(["#5d85cf", "#7c6561", "#da7847", "#6fb971", "#9e70cf", "#bbbbbb"]);
+
+        // Retrieve hierarchy JSON, create visualization from it
+        d3.json("https://raw.githubusercontent.com/d3/d3-hierarchy/main/test/data/flare.json").then(function(json) {
+            createVisualization(json);
+        });
+
+        // Main function to draw and set up the visualization, once we have the data.
+        function createVisualization(json) {
+            var nodes = partition(json);
+
+            // Path creation
+            var path = svg.append("g")
+                .selectAll("path")
+                .attr("fill", "none")
+                .attr("pointer-events", "all")
+                .data(nodes.descendants().filter(d => {
+                    // Don't draw the root node, and for efficiency, filter out nodes that would be too small to see
+                    return d.depth && d.x1 - d.x0 > 0.001;
+                }))
+                .join("path")
+                    .attr("display", function(d) { return d.depth ? null : "none"; })
+                    .attr("d", d => arc(d))
+                    .attr("fill", d => color(d.data.name))
+                    .style("opacity", 1)
+
+        };
+    </script>
+</body>
+
+</html>
