@@ -6,12 +6,7 @@
 
 <body>
     <script type="text/javascript">
-        // Retrieval of tree structure from a given GitHub repo
-        d3.json("https://api.github.com/repos/jasondamico/pgov-cover-sheet-reader/git/trees/main?recursive=true").then(function(json) {
-            root = getCleanedGitHubJSON(json);
-
-            createVisualization(root);
-        })
+        visualizeGitHubRepo("https://github.com/mir-group/flare");
 
         // Dimensions of sunburst
         var width = 750;
@@ -46,6 +41,25 @@
             .scaleOrdinal()
             .domain(["home", "product", "search", "account", "other", "end"])
             .range(["#5d85cf", "#7c6561", "#da7847", "#6fb971", "#9e70cf", "#bbbbbb"]);
+
+        async function visualizeGitHubRepo(repoLink) {
+            // Retrieves everything after "github.com/" in link (owner and repo name, in that order, separated by "/")
+            apiParams = repoLink.substring(repoLink.indexOf("github.com/") + "github.com/".length);
+
+            var defaultBranch;
+
+            // Retrieve default branch name
+            await d3.json(`https://api.github.com/repos/${apiParams}`).then(function(json) {
+                defaultBranch = json["default_branch"];
+            });
+
+            // Retrieval of tree structure from a given GitHub repo
+            d3.json(`https://api.github.com/repos/${apiParams}/git/trees/${defaultBranch}?recursive=true`).then(function(json) {
+                root = getCleanedGitHubJSON(json);
+
+                createVisualization(root);
+            });
+        }
 
         /**
          * Returns a cleaned version of the JSON data retrieved from accessing a GitHub repository tree. Returned JSON object begins with a root (the project folder) and holds the hierarchy of the tree as nested objects and arrays (stored as children).
