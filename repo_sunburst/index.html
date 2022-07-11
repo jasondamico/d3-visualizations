@@ -179,7 +179,18 @@
                 d3.selectAll(".text-label").remove();
             }
         };
+
+        function retrieveRepoLink() {
+            var gitHubLink = document.getElementById("github-url").value;
+
+            visualizeGitHubRepo(gitHubLink);
+        }
     </script>
+
+    <form>
+        <input type="text" placeholder="GitHub repo URL" id="github-url" >
+        <button onclick="retrieveRepoLink()" type="button">Visualize</button>
+    </form>
 </body>
 
 </html>
