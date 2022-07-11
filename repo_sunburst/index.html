@@ -144,10 +144,9 @@
                 .attr("pointer-events", "all")
                 .data(nodes.descendants().filter(d => {
                     // Don't draw the root node, and for efficiency, filter out nodes that would be too small to see
-                    return d.depth && d.x1 - d.x0 > 0.001;
+                    return d.x1 - d.x0 > 0.001;
                 }))
                 .join("path")
-                    .attr("display", function(d) { return d.depth ? null : "none"; })
                     .attr("d", d => arc(d))
                     .attr("fill", d => (d.data.value === undefined) ? directoryColorScale(d.depth) : "#ec8b32")
                     .style("opacity", 1)
