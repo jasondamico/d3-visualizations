@@ -58,6 +58,13 @@
                 root = getCleanedGitHubJSON(json);
 
                 createVisualization(root);
+
+                // Retrieves name of repo, places in center of visualization
+                svg.append("text")
+                    .style("font-size", 17)
+                    .style("fill", "#222")
+                    .style("text-anchor", "middle")
+                    .text(apiParams.split("/")[1])
             });
         }
 
@@ -147,6 +154,7 @@
                     return d.x1 - d.x0 > 0.001;
                 }))
                 .join("path")
+                    .attr("class", (d) => `depth-${d.depth}`)
                     .attr("d", d => arc(d))
                     .attr("fill", d => (d.data.value === undefined) ? directoryColorScale(d.depth) : "#ec8b32")
                     .style("opacity", 1)
@@ -155,13 +163,15 @@
 
             function mouseOver(e, d) {
                 // Place text on top of hovered element (template: https://plnkr.co/edit/SvDlDUvM2UgkILkxyfxI?p=preview&preview)
-                d3.select(this.parentNode).append("text")
-                    .attr("class", "text-label")
-                    .style("text-anchor", "middle")
-                    .style("font-size", 17)
-                    .style("fill", "#222")
-                    .attr("transform", () => `translate(${ arc.centroid(d) })`)
-                    .text(() =>  d.data.name)
+                if (d.depth !== 0) {
+                    d3.select(this.parentNode).append("text")
+                        .attr("class", "text-label")
+                        .style("text-anchor", "middle")
+                        .style("font-size", 17)
+                        .style("fill", "#222")
+                        .attr("transform", () => `translate(${ arc.centroid(d) })`)
+                        .text(() =>  d.data.name)
+                }
             }
 
             function mouseOut(e, d) {
