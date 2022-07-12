@@ -77,7 +77,7 @@
             var urlParams = paramsString.split("/");
 
             root = {
-                name: "root",
+                name: urlParams[1],
                 children: [],
                 metadata: {
                     owner: urlParams[0],
@@ -181,7 +181,7 @@
                     .style("font-size", 17)
                     .style("fill", "#222")
                     .style("text-anchor", "middle")
-                    .text(json.metadata.repoName)
+                    .text(json.name)
 
             function mouseOver(e, d) {
                 // Place text on top of hovered element (template: https://plnkr.co/edit/SvDlDUvM2UgkILkxyfxI?p=preview&preview)
