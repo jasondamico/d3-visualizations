@@ -169,7 +169,8 @@
                     .attr("fill", d => (d.data.value === undefined) ? directoryColorScale(d.depth) : "#ec8b32")
                     .style("opacity", 1)
                     .on("mouseover", mouseOver)
-                    .on("mouseout", mouseOut);
+                    .on("mouseout", mouseOut)
+                    .on("click", click);
 
             // Removes existing repo name (if present)
             svg.select(".repo-name")
@@ -200,12 +201,67 @@
                 // Remove text label for the formerly hovered element
                 d3.selectAll(".text-label").remove();
             }
+
+            function click(e, d) {
+                // Retrieve JSON object of selected path (needed to create partition)
+                newJSON = getJSONFromPath(d);
+
+                newJSON.metadata = json.metadata;
+
+                createVisualization(newJSON);
+            }
+
+            // Given a passed partition, returns the hierarchical JSON used to create that partition with the passed partition as the root
+            function getJSONFromPath(d) {
+                var stack = []
+                var node = d;
+
+                // Retrieving a stack of the parent nodes; stops when the parent node of the root is accessed
+                while (node.parent !== null) {
+                    stack.push(node.data.name);
+
+                    node = node.parent;
+                }
+
+                // Initialize the new JSON object as the hierarchy starting at the root of the project
+                var newJSON = json;
+
+                // Continually find children
+                while (stack.length !== 0) {
+                    var childName = stack.pop();
+
+                    // Binary search for next node in children by using names
+                    newJSON = binarySearchChildren(newJSON.children, childName, 0, newJSON.children.length)
+                }
+
+                return newJSON;
+            }
         };
 
         function retrieveRepoLink() {
             var gitHubLink = document.getElementById("github-url").value;
 
             visualizeGitHubRepo(gitHubLink);
+        }
+
+        // Returns the child JSON object of the passed name if found, null otherwise
+        function binarySearchChildren(children, name, start, end) {
+            if (start > end) {
+                // Assertion: object with passed name not found
+                return null;
+            }
+
+            mid = Math.floor((start + end) / 2);
+
+            compare = name.localeCompare(children[mid].name);
+
+            if (compare === -1) {
+                return binarySearchChildren(children, name, start, mid - 1);
+            } else if (compare === 1) {
+                return binarySearchChildren(children, name, mid + 1, end)
+            } else {
+                return children[mid];
+            }
         }
     </script>
 
