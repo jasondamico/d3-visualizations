@@ -21,6 +21,10 @@
             .attr("id", "container")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
+        // Create group to contain sunburst
+        var path = svg.append("g")
+            .attr("class", "sunburst-container")
+
         // Define partition function for passed data
         var partition = data => d3.partition()
             .size([2 * Math.PI, radius * radius])(
@@ -58,13 +62,6 @@
                 root = getCleanedGitHubJSON(json);
 
                 createVisualization(root);
-
-                // Retrieves name of repo, places in center of visualization
-                svg.append("text")
-                    .style("font-size", 17)
-                    .style("fill", "#222")
-                    .style("text-anchor", "middle")
-                    .text(apiParams.split("/")[1])
             });
         }
 
@@ -75,9 +72,17 @@
          * @return (Object)     Refactored version of the passed JSON object that is in a hierarchical structure.
          */
         function getCleanedGitHubJSON(json) {
+            // Retrieve repo name and owner name from API response
+            var paramsString = json.url.substring(json.url.indexOf("https://api.github.com/repos/") + "https://api.github.com/repos/".length);
+            var urlParams = paramsString.split("/");
+
             root = {
                 name: "root",
-                children: []
+                children: [],
+                metadata: {
+                    owner: urlParams[0],
+                    repoName: urlParams[1]
+                }
             }
 
             for (var i = 0; i < json.tree.length; i++) {
@@ -144,8 +149,13 @@
                 .domain([0, treeHeight])
                 .range(["#bcd4eb", "#5a95cd"])
 
+            // Removes prior visualization (if present)
+            svg.select(".sunburst-container")
+                .selectAll("path")
+                .remove()
+
             // Path creation
-            var path = svg.append("g")
+            svg.select(".sunburst-container")
                 .selectAll("path")
                 .attr("fill", "none")
                 .attr("pointer-events", "all")
@@ -160,6 +170,18 @@
                     .style("opacity", 1)
                     .on("mouseover", mouseOver)
                     .on("mouseout", mouseOut);
+
+            // Removes existing repo name (if present)
+            svg.select(".repo-name")
+                .remove()
+
+            // Retrieves name of repo, places in center of visualization
+            svg.append("text")
+                    .attr("class", "repo-name")
+                    .style("font-size", 17)
+                    .style("fill", "#222")
+                    .style("text-anchor", "middle")
+                    .text(json.metadata.repoName)
 
             function mouseOver(e, d) {
                 // Place text on top of hovered element (template: https://plnkr.co/edit/SvDlDUvM2UgkILkxyfxI?p=preview&preview)
