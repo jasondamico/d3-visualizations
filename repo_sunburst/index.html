@@ -147,13 +147,8 @@
         function createVisualization(json) {
             var nodes = partition(json);
 
-            // Retrieves height of entire tree
-            var treeHeight = d3.max(nodes, function(d) {
-                return d.depth;
-            })
-
             directoryColorScale = d3.scaleLinear()
-                .domain([0, treeHeight])
+                .domain([0, nodes.height])
                 .range(["#bcd4eb", "#5a95cd"])
 
             // Path creation
