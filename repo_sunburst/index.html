@@ -203,12 +203,15 @@
             }
 
             function click(e, d) {
-                // Retrieve JSON object of selected path (needed to create partition)
-                newJSON = getJSONFromPath(d);
+                // Check that clicked partition object is not a root node
+                if (d.data.value === undefined) {
+                    // Retrieve JSON object of selected path (needed to create partition)
+                    newJSON = getJSONFromPath(d);
 
-                newJSON.metadata = json.metadata;
+                    newJSON.metadata = json.metadata;
 
-                createVisualization(newJSON);
+                    createVisualization(newJSON);
+                }
             }
 
             // Given a passed partition, returns the hierarchical JSON used to create that partition with the passed partition as the root
