@@ -21,9 +21,15 @@
             .attr("id", "container")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-        // Create group to contain sunburst
+        // Create elements that will be bound with data once it is retrieved
         var path = svg.append("g")
             .attr("class", "sunburst-container")
+
+        var text = svg.append("text")
+            .attr("class", "repo-name")
+            .style("font-size", 17)
+            .style("fill", "#222")
+            .style("text-anchor", "middle")
 
         // Define partition function for passed data
         var partition = data => d3.partition()
@@ -106,7 +112,8 @@
                     if (dirIndex === currentLevel.children.length) {
                         // Assertion: directory/file not found in children; must be created
                         var newObject = {
-                            name: dir
+                            name: dir,
+                            path: `${root.name}/${obj.path}`
                         }
 
                         if (obj.type === "blob") {
@@ -149,11 +156,6 @@
                 .domain([0, treeHeight])
                 .range(["#bcd4eb", "#5a95cd"])
 
-            // Removes prior visualization (if present)
-            svg.select(".sunburst-container")
-                .selectAll("path")
-                .remove()
-
             // Path creation
             svg.select(".sunburst-container")
                 .selectAll("path")
@@ -162,7 +164,7 @@
                 .data(nodes.descendants().filter(d => {
                     // Don't draw the root node, and for efficiency, filter out nodes that would be too small to see
                     return d.x1 - d.x0 > 0.001;
-                }))
+                }), d => `${d.data.path}`)
                 .join("path")
                     .attr("class", (d) => `depth-${d.depth}`)
                     .attr("d", d => arc(d))
@@ -172,17 +174,8 @@
                     .on("mouseout", mouseOut)
                     .on("click", click);
 
-            // Removes existing repo name (if present)
             svg.select(".repo-name")
-                .remove()
-
-            // Retrieves name of repo, places in center of visualization
-            svg.append("text")
-                    .attr("class", "repo-name")
-                    .style("font-size", 17)
-                    .style("fill", "#222")
-                    .style("text-anchor", "middle")
-                    .text(json.name)
+                .text(json.name)
 
             function mouseOver(e, d) {
                 // Place text on top of hovered element (template: https://plnkr.co/edit/SvDlDUvM2UgkILkxyfxI?p=preview&preview)
