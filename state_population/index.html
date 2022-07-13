@@ -9,6 +9,11 @@
         var width = 700;
         var height = 900;
 
+        var margin = {
+            left: 30,
+            right: 30
+        }
+
         const svg = d3.select("body").append("svg")
             .attr("width", width)
             .attr("height", height);
@@ -30,6 +35,20 @@
 
                 data[i].population = pop;
             }
+
+            // Set scales and axes
+            xScale = d3.scaleBand(
+                data.map(d => d.name),
+                [margin.left, width - margin.right]
+            ).padding(0.2)
+
+            yScale = d3.scaleLinear(
+                [0, d3.max(data, d => d.population)],
+                [height - margin.bottom, margin.top]
+            );
+
+            xAxis = d3.axisBottom(xScale);
+            yAxis = d3.axisLeft(yScale);
         });
     </script>
 </body>
