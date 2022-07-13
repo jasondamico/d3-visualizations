@@ -47,6 +47,14 @@
             .outerRadius(d => Math.sqrt(d.y1) - 1)
             .padAngle(.001);
 
+        var adjustedArc = d3.arc()
+            .startAngle(d => d.x0)
+            .endAngle(d => d.x1)
+            .innerRadius(d => originalArcRadii[d.depth].innerRadius)
+            .outerRadius(d => originalArcRadii[d.depth].outerRadius)
+            .padAngle(.001)
+        ;
+
         var color = d3
             .scaleOrdinal()
             .domain(["home", "product", "search", "account", "other", "end"])
@@ -173,9 +181,7 @@
                         .on("mouseout", mouseOut)
                         .on("click", click),
                     update => update
-                        .attr("class", (d) => `depth-${d.depth}`)
-                        .attr("d", d => arc(d))
-                        .style("opacity", 1)
+                        .attr("d", d => adjustedArc(d))
                         .on("mouseover", mouseOver)
                         .on("mouseout", mouseOut)
                         .on("click", click),
