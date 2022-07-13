@@ -52,6 +52,9 @@
             .domain(["home", "product", "search", "account", "other", "end"])
             .range(["#5d85cf", "#7c6561", "#da7847", "#6fb971", "#9e70cf", "#bbbbbb"]);
 
+        // Initialize object to hold the original arc radii
+        var originalArcRadii = [];
+
         async function visualizeGitHubRepo(repoLink) {
             // Retrieves everything after "github.com/" in link (owner and repo name, in that order, separated by "/")
             apiParams = repoLink.substring(repoLink.indexOf("github.com/") + "github.com/".length);
@@ -87,7 +90,8 @@
                 children: [],
                 metadata: {
                     owner: urlParams[0],
-                    repoName: urlParams[1]
+                    repoName: urlParams[1],
+                    fromAPI: true
                 }
             }
 
@@ -181,6 +185,40 @@
             svg.select(".repo-name")
                 .text(json.name)
 
+            if (json.metadata.fromAPI) {
+                // Storing original radii
+                var maxHeight = nodes.height;
+                var d = 0;
+                var node = nodes;
+
+                while (d <= maxHeight) {
+                    // Store radii at depth d
+                    originalArcRadii.push({
+                        innerRadius: Math.sqrt(node.y0),
+                        outerRadius: Math.sqrt(node.y1) - 1
+                    })
+
+                    if (d != maxHeight) {
+                        var nextNode = null;
+                        var i = 0;
+
+                        // Search for an arc in children that maintains max height
+                        while (nextNode === null) {
+                            // Checking to see if the depth of node and height of subtree add up to max height
+                            if (node.children[i].height + node.children[i].depth == maxHeight) {
+                                nextNode = node.children[i];
+                            } else {
+                                i++;
+                            }
+                        }
+
+                        node = nextNode;
+                    }
+
+                    d++;
+                }
+            }
+
             function mouseOver(e, d) {
                 // Place text on top of hovered element (template: https://plnkr.co/edit/SvDlDUvM2UgkILkxyfxI?p=preview&preview)
                 if (d.depth !== 0) {
@@ -206,6 +244,7 @@
                     newJSON = getJSONFromPath(d);
 
                     newJSON.metadata = json.metadata;
+                    newJSON.metadata.fromAPI = false;
 
                     createVisualization(newJSON);
                 }
