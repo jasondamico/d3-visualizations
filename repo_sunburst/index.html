@@ -182,8 +182,6 @@
                         .on("click", click),
                     update => update
                         .attr("d", d => adjustedArc(d))
-                        .on("mouseover", mouseOver)
-                        .on("mouseout", mouseOut)
                         .on("click", click),
                     exit => exit.remove()
                 );
@@ -233,7 +231,7 @@
                         .style("text-anchor", "middle")
                         .style("font-size", 17)
                         .style("fill", "#222")
-                        .attr("transform", () => `translate(${ arc.centroid(d) })`)
+                        .attr("transform", () => `translate(${ adjustedArc.centroid(d) })`)
                         .text(() =>  d.data.name)
                 }
             }
