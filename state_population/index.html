@@ -13,12 +13,23 @@
             .attr("width", width)
             .attr("height", height);
 
-        d3.csv("us-population-state-age.csv").then(function(data) {
+        d3.csv("us-population-state-age.csv", d3.autoType).then(function(data) {
             // Fixing name of 80+ column such that it can be typed on keyboard
             data.forEach(row => {
                 row["80+"] = row["≥80"];
                 delete row["≥80"];
             });
+
+            // Adding total population to data
+            for (var i = 0; i < data.length; i++) {
+                var pop = 0;
+
+                Object.keys(data[i]).filter(k => k !== "name").forEach(k => {
+                    pop = pop + data[i][k]
+                })
+
+                data[i].population = pop;
+            }
         });
     </script>
 </body>
