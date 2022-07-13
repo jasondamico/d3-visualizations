@@ -37,15 +37,15 @@
             }
 
             // Set scales and axes
-            xScale = d3.scaleBand(
-                data.map(d => d.name),
-                [margin.left, width - margin.right]
-            ).padding(0.2)
-
-            yScale = d3.scaleLinear(
+            xScale = d3.scaleLinear(
                 [0, d3.max(data, d => d.population)],
-                [height - margin.bottom, margin.top]
+                [margin.left, width - margin.right]
             );
+
+            yScale = d3.scaleBand(
+                data.map(d => d.name),
+                [height - margin.bottom, margin.top]
+            ).padding(0.2);
 
             xAxis = d3.axisBottom(xScale);
             yAxis = d3.axisLeft(yScale);
