@@ -46,7 +46,7 @@
 
             yScale = d3.scaleBand(
                 data.map(d => d.name),
-                [height - margin.bottom, margin.top]
+                [margin.top, height - margin.bottom]
             ).padding(0.2);
 
             xAxis = d3.axisBottom(xScale);
