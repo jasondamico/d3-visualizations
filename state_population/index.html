@@ -23,7 +23,10 @@
         d3.csv("us-population-state-age.csv", d3.autoType).then(function(data) {
             // Fixing name of 80+ column such that it can be typed on keyboard
             data.forEach(row => {
-                row["80+"] = row["≥80"];
+                row["0-10"] = row["<10"];
+                delete row["<10"];
+
+                row["80-"] = row["≥80"];
                 delete row["≥80"];
             });
 
@@ -52,7 +55,7 @@
             xAxis = d3.axisBottom(xScale);
             yAxis = d3.axisLeft(yScale);
 
-            var stackKeys = Object.keys(data[0]).filter(k => k !== "name" && k !== "population");
+            var stackKeys = Object.keys(data[0]).filter(k => k !== "name" && k !== "population").sort();
 
             // Create color scheme based on stack keys
             color = d3.scaleLinear(
@@ -64,6 +67,13 @@
                 .keys(stackKeys);
 
             stackedData = stack(data);
+
+            // Add key to each nested array
+            stackedData.forEach(element => {
+                element.forEach(arr => {
+                    arr.key = element.key;
+                })
+            })
 
             // Adding groups for each band type
             var groups = svg.append("g")
@@ -77,10 +87,35 @@
             d3.select(".vis-container").selectAll("g").selectAll("rect")
                 .data(d => d)
                 .join("rect")
+                    .attr("class", d => `${d.data.name}-${d.key}`)
                     .attr("x", d => xScale(d[0]))
                     .attr("y", d => yScale(d.data.name))
                     .attr("width", d => xScale(d[1]) - xScale(d[0]))
                     .attr("height", yScale.bandwidth());
+
+            d3.select(".vis-container").selectAll("g").selectAll("text")
+                .data(d => d)
+                .join("text")
+                    .attr("x", d => (xScale(d[0]) + xScale(d[1])) / 2)
+                    .attr("y", d => yScale(d.data.name) + (yScale.bandwidth() / 1.7))   // divide by 1.7 as dividing by 2 put the text too close to the top of the rectangle
+                    .attr("fill", "black")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "14px")
+                    .attr("alignment-baseline", "middle")
+                    .text((d) => d.key)
+                    .attr("fill", function(d) {
+                        var textWidth = Math.floor(this.getComputedTextLength());
+                        // Get width of rect over which data will be displayed
+                        var rectWidth = parseInt(d3.select(`rect.${d.data.name}-${d.key}`).attr("width"));
+
+                        const textPadding = 4;
+
+                        if (textWidth < rectWidth - textPadding) {
+                            return "black"
+                        } else {
+                            return "none"
+                        }
+                    });
 
             svg.append("g")
                 .attr("class", "x-axis")
