@@ -52,8 +52,12 @@
                 [margin.top, height - margin.bottom]
             ).padding(0.2);
 
-            xAxis = d3.axisBottom(xScale);
-            yAxis = d3.axisLeft(yScale);
+            xAxis = d3.axisBottom(xScale)
+                .tickFormat(d3.format(".2s"))
+                .tickSizeOuter(0);
+            yAxis = d3.axisLeft(yScale)
+                .tickSizeOuter(0)
+                .tickSize(0);
 
             var stackKeys = Object.keys(data[0]).filter(k => k !== "name" && k !== "population").sort();
 
