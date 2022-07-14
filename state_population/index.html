@@ -64,6 +64,28 @@
                 .keys(stackKeys);
 
             stackedData = stack(data);
+
+            // Adding groups for each band type
+            var groups = svg.append("g")
+                .attr("class", "vis-container")
+                .selectAll("g")
+                .data(stackedData)
+                .join("g")
+                    .attr("class", (d, i) => `${stackKeys[i]}-bands`)
+                    .attr("fill", (d, i) => color(i));
+
+            d3.select(".vis-container").selectAll("g").selectAll("rect")
+                .data(d => d)
+                .join("rect")
+                    .attr("x", d => xScale(d[0]))
+                    .attr("y", d => {
+                        console.log(yScale(d.data.name))
+                        return yScale(d.data.name)
+                    })
+                    .attr("width", d => xScale(d[1]) - xScale(d[0]))
+                    .attr("height", yScale.bandwidth())
+
+            // console.log(stackedData)
         });
     </script>
 </body>
