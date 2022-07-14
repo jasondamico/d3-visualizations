@@ -49,6 +49,13 @@
 
             xAxis = d3.axisBottom(xScale);
             yAxis = d3.axisLeft(yScale);
+
+            var stackKeys = Object.keys(data[0]).filter(k => k !== "name" && k !== "population");
+
+            stack = d3.stack()
+                .keys(stackKeys);
+
+            stackedData = stack(data);
         });
     </script>
 </body>
