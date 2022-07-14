@@ -62,9 +62,9 @@
             var stackKeys = Object.keys(data[0]).filter(k => k !== "name" && k !== "population").sort();
 
             // Create color scheme based on stack keys
-            color = d3.scaleLinear(
+            color = d3.scaleQuantize(
                 [0, stackKeys.length - 1],
-                [d3.schemeBuGn[9][2], d3.schemeBuGn[9][8]]
+                d3.schemeSet3.slice(0, 9)
             )
 
             stack = d3.stack()
