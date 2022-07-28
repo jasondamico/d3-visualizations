@@ -16,11 +16,14 @@
         };
 
         // Initialize SVG element for visualization
-        var svg = d3.select("body").append("svg")
+        const svg = d3.select("body").append("svg")
             .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("id", "container");
+            .attr("height", height);
+
+        const g = svg.append('g')
+            .attr("id", "container")
+            .style('font-family', 'sans-serif')
+            .style('font-size', 10);
 
         // Retrieve Alabama data
         fetch("../data/al_grid.csv")
@@ -28,7 +31,27 @@
             .then(text => {
                 // Convert text into list of objects
                 data = d3.csvParse(text, d3.autoType);
-            });
+
+                xScale = d3.scaleLinear()
+                    .domain([0, d3.max(data, d => d.ilcr)])
+                    .range([margin.left, width - margin.right]);
+
+                yScale = d3.scaleLinear()
+                    .domain([0, 1])
+                    .range([height - margin.bottom, margin.top]);
+
+                g
+                    .selectAll("g")
+                    .data(data)
+                    .join("g")
+                        .attr("class", "point")
+                        .attr('transform', d => `translate(${xScale(d["ilcr"])},${yScale(d["White alone %"])})`)
+                    .call(g => g
+                        .append("circle")
+                        .attr("r", 2)
+                        .style('fill', 'black')
+                    );
+                });
     </script>
 </body>
 
