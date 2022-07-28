@@ -52,6 +52,18 @@
                         .style('fill', 'black')
                     );
                 });
+
+                svg
+                    .append("g")
+                    .attr("id", "y-axis")
+                    .attr("transform", `translate(${ margin.left },0)`)
+                    .call(d3.axisLeft(yScale));
+
+                svg
+                    .append("g")
+                    .attr("id", "x-axis")
+                    .attr("transform", `translate(0,${ height - margin.bottom })`)
+                    .call(d3.axisBottom(xScale));
     </script>
 </body>
 
