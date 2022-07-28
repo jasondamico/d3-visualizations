@@ -51,7 +51,6 @@
                         .attr("r", 2)
                         .style('fill', 'black')
                     );
-                });
 
                 svg
                     .append("g")
@@ -64,6 +63,8 @@
                     .attr("id", "x-axis")
                     .attr("transform", `translate(0,${ height - margin.bottom })`)
                     .call(d3.axisBottom(xScale));
+
+                });
     </script>
 </body>
 
