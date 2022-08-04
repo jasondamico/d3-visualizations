@@ -25,6 +25,40 @@
             .style('font-family', 'sans-serif')
             .style('font-size', 10);
 
+        function createScatterPlot(data, xField, yField) {
+            xScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d[xField])])
+                .range([margin.left, width - margin.right]);
+
+            yScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d[yField])])
+                .range([height - margin.bottom, margin.top]);
+
+            g
+                .selectAll("g")
+                .data(data)
+                .join("g")
+                    .attr("class", "point")
+                    .attr('transform', d => `translate(${xScale(d[xField])},${yScale(d[yField])})`)
+                .call(g => g
+                    .append("circle")
+                    .attr("r", 2)
+                    .style("fill", d => (d["ilcr"] === 0) ? "black" : "red")    // colors points with over 1/100,000  lifetime cancer risk red
+                );
+
+            svg
+                .append("g")
+                .attr("id", "y-axis")
+                .attr("transform", `translate(${ margin.left },0)`)
+                .call(d3.axisLeft(yScale));
+
+            svg
+                .append("g")
+                .attr("id", "x-axis")
+                .attr("transform", `translate(0,${ height - margin.bottom })`)
+                .call(d3.axisBottom(xScale));
+        }
+
         // Retrieve Alabama data
         fetch("../data/al_grid.csv")
             .then(response => response.text())
@@ -32,39 +66,8 @@
                 // Convert text into list of objects
                 data = d3.csvParse(text, d3.autoType);
 
-                xScale = d3.scaleLinear()
-                    .domain([0, d3.max(data, d => d.ilcr)])
-                    .range([margin.left, width - margin.right]);
-
-                yScale = d3.scaleLinear()
-                    .domain([0, 1])
-                    .range([height - margin.bottom, margin.top]);
-
-                g
-                    .selectAll("g")
-                    .data(data)
-                    .join("g")
-                        .attr("class", "point")
-                        .attr('transform', d => `translate(${xScale(d["ilcr"])},${yScale(d["White alone %"])})`)
-                    .call(g => g
-                        .append("circle")
-                        .attr("r", 2)
-                        .style('fill', 'black')
-                    );
-
-                svg
-                    .append("g")
-                    .attr("id", "y-axis")
-                    .attr("transform", `translate(${ margin.left },0)`)
-                    .call(d3.axisLeft(yScale));
-
-                svg
-                    .append("g")
-                    .attr("id", "x-axis")
-                    .attr("transform", `translate(0,${ height - margin.bottom })`)
-                    .call(d3.axisBottom(xScale));
-
-                });
+                createScatterPlot(data, "ilcr", "White alone %")
+            });
     </script>
 </body>
 
