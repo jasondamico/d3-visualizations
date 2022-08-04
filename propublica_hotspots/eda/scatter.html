@@ -46,17 +46,26 @@
                     .style("fill", d => (d["ilcr"] === 0) ? "black" : "red")    // colors points with over 1/100,000  lifetime cancer risk red
                 );
 
-            svg
-                .append("g")
+            // Adding axes
+            g.append("g")
                 .attr("id", "y-axis")
                 .attr("transform", `translate(${ margin.left },0)`)
                 .call(d3.axisLeft(yScale));
 
-            svg
-                .append("g")
+            g.append("g")
                 .attr("id", "x-axis")
                 .attr("transform", `translate(0,${ height - margin.bottom })`)
                 .call(d3.axisBottom(xScale));
+
+            // Adding axis labels
+            g.append("text")
+                .attr("x", width / 2)
+                .attr("y", height - margin.bottom / 4)
+                .text(xField)
+
+            g.append("text")
+                .attr("transform", `translate(${margin.left / 3}, ${height / 2}) rotate(90)`)
+                .text(yField)
         }
 
         // Retrieve Alabama data
