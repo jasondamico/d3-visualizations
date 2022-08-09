@@ -39,6 +39,15 @@
                     }
                 }
 
+                coordinateValues.X.numSquares = coordinateValues.X.max - coordinateValues.X.min;
+                coordinateValues.Y.numSquares = coordinateValues.Y.max - coordinateValues.Y.min;
+
+                // Square width determined as minimum size needed to fill either width or height
+                var squareWidth = d3.min([
+                    (width - margin.left - margin.right) / coordinateValues.X.numSquares, 
+                    (height - margin.bottom - margin.top) / coordinateValues.Y.numSquares
+                ]);
+
                 xScale = d3.scaleLinear()
                     .domain([coordinateValues.X.min, coordinateValues.X.max])
                     .range([margin.left, width - margin.right]);
@@ -55,6 +64,8 @@
                     g.selectAll("rect")
                         .data(data)
                         .join("rect")
+                            .attr("width", squareWidth)
+                            .attr("height", squareWidth)
                             .attr("x", (d) => xScale(d.X))
                             .attr("y", (d) => yScale(d.Y))
                             .style("fill", "black")
