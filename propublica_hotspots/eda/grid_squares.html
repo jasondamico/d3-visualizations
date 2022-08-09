@@ -56,6 +56,10 @@
                     .domain([coordinateValues.Y.min, coordinateValues.Y.max])
                     .range([height - margin.bottom, margin.top]);
 
+                colors = d3.scaleLinear()
+                    .domain([d3.min(data, d => d.ilcr), d3.max(data, d => d.ilcr)])
+                    .range(["#fff5f0", "#67000d"]);
+
                 g = svg.append("g")
                         .attr("class", "container")
 
@@ -68,7 +72,7 @@
                             .attr("height", squareWidth)
                             .attr("x", (d) => xScale(d.X))
                             .attr("y", (d) => yScale(d.Y))
-                            .style("fill", "black")
+                            .style("fill", (d) => ((d.ilcr !== 0) ? colors(d.ilcr) : "#D3D3D3"))
                             .style("stroke", "white")
                             .attr("stroke-width", "0.1")
                 }
