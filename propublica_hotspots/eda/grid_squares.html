@@ -26,6 +26,43 @@
             .then(text => {
                 // Convert text into list of objects
                 data = d3.csvParse(text, d3.autoType);
+
+                var coordinateValues = {
+                    X: {
+                        min: d3.min(data, d => d.X),
+                        max: d3.max(data, d => d.X)
+                    },
+
+                    Y: {
+                        min: d3.min(data, d => d.Y),
+                        max: d3.max(data, d => d.Y)
+                    }
+                }
+
+                xScale = d3.scaleLinear()
+                    .domain([coordinateValues.X.min, coordinateValues.X.max])
+                    .range([margin.left, width - margin.right]);
+
+                yScale = d3.scaleLinear()
+                    .domain([coordinateValues.Y.min, coordinateValues.Y.max])
+                    .range([height - margin.bottom, margin.top]);
+
+                g = svg.append("g")
+                        .attr("class", "container")
+
+                // Creates the grid visualization using the passed data
+                function createGrid(data) {
+                    g.selectAll("rect")
+                        .data(data)
+                        .join("rect")
+                            .attr("x", (d) => xScale(d.X))
+                            .attr("y", (d) => yScale(d.Y))
+                            .style("fill", "black")
+                            .style("stroke", "white")
+                            .attr("stroke-width", "0.1")
+                }
+
+                createGrid(data);
             });
     </script>
 </body>
