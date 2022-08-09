@@ -19,6 +19,14 @@
         const svg = d3.select("body").append("svg")
             .attr("width", width)
             .attr("height", height);
+
+        // Retrieve gridsquare data
+        fetch("../data/al_grid.csv")
+            .then(response => response.text())
+            .then(text => {
+                // Convert text into list of objects
+                data = d3.csvParse(text, d3.autoType);
+            });
     </script>
 </body>
 </html>
