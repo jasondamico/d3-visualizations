@@ -6,7 +6,7 @@
 <body>
     <script type="text/javascript">
         var width = 750;
-        var height = 600;
+        var height = 750;
 
         var margin = {
             top: 10, 
@@ -37,31 +37,34 @@
                         min: d3.min(data, d => d.Y),
                         max: d3.max(data, d => d.Y)
                     }
-                }
+                };
 
                 coordinateValues.X.numSquares = coordinateValues.X.max - coordinateValues.X.min;
                 coordinateValues.Y.numSquares = coordinateValues.Y.max - coordinateValues.Y.min;
 
-                // Square width determined as minimum size needed to fill either width or height
-                var squareWidth = d3.min([
+                var squareSizes = [
                     (width - margin.left - margin.right) / coordinateValues.X.numSquares, 
                     (height - margin.bottom - margin.top) / coordinateValues.Y.numSquares
-                ]);
+                ];
+
+                // Square width determined as minimum size needed to fill either width or height
+                var squareWidthIndex = d3.minIndex(squareSizes);
+                var squareWidth = squareSizes[squareWidthIndex];
 
                 xScale = d3.scaleLinear()
                     .domain([coordinateValues.X.min, coordinateValues.X.max])
-                    .range([margin.left, width - margin.right]);
+                    .range([margin.left, ((squareWidthIndex === 0) ? width - margin.right : margin.left + squareWidth * coordinateValues.X.numSquares)]);
 
                 yScale = d3.scaleLinear()
                     .domain([coordinateValues.Y.min, coordinateValues.Y.max])
-                    .range([height - margin.bottom, margin.top]);
+                    .range([height - margin.bottom, ((squareWidthIndex === 1) ? margin.top : (height - margin.bottom) - squareWidth * coordinateValues.Y.numSquares)]);
 
                 colors = d3.scaleLinear()
                     .domain([d3.min(data, d => d.ilcr), d3.max(data, d => d.ilcr)])
                     .range(["#fff5f0", "#67000d"]);
 
                 g = svg.append("g")
-                        .attr("class", "container")
+                        .attr("class", "container");
 
                 // Creates the grid visualization using the passed data
                 function createGrid(data) {
@@ -74,7 +77,7 @@
                             .attr("y", (d) => yScale(d.Y))
                             .style("fill", (d) => ((d.ilcr !== 0) ? colors(d.ilcr) : "#D3D3D3"))
                             .style("stroke", "white")
-                            .attr("stroke-width", "0.1")
+                            .attr("stroke-width", "0.1");
                 }
 
                 createGrid(data);
