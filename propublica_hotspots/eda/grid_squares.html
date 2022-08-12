@@ -59,15 +59,22 @@
                     .domain([coordinateValues.Y.min, coordinateValues.Y.max])
                     .range([height - margin.bottom, ((squareWidthIndex === 1) ? margin.top : (height - margin.bottom) - squareWidth * coordinateValues.Y.numSquares)]);
 
-                colors = d3.scaleLinear()
-                    .domain([d3.min(data, d => d.ilcr), d3.max(data, d => d.ilcr)])
-                    .range(["#fff5f0", "#67000d"]);
-
                 g = svg.append("g")
                         .attr("class", "container");
 
                 // Creates the grid visualization using the passed data
-                function createGrid(data) {
+                function createGrid(data, colorMethod) {
+                    var colors;
+
+                    if (colorMethod == "Total") {
+                        colors = d3.scaleSequential(d3.interpolatePlasma)
+                            .domain([d3.min(data, d => d.Total), d3.max(data, d => d.Total)]);
+                    } else if (colorMethod == "ilcr") {
+                        colors = d3.scaleLinear()
+                            .domain([d3.min(data, d => d.ilcr), d3.max(data, d => d.ilcr)])
+                            .range(["#fff5f0", "#67000d"]);
+                    }
+
                     g.selectAll("rect")
                         .data(data)
                         .join("rect")
@@ -75,12 +82,12 @@
                             .attr("height", squareWidth)
                             .attr("x", (d) => xScale(d.X))
                             .attr("y", (d) => yScale(d.Y))
-                            .style("fill", (d) => ((d.ilcr !== 0) ? colors(d.ilcr) : "#D3D3D3"))
-                            .style("stroke", "white")
+                            .style("fill", (d) => colors(d[colorMethod]))
+                            .style("stroke", (d) => colors(d[colorMethod]))
                             .attr("stroke-width", "0.1");
                 }
 
-                createGrid(data);
+                createGrid(data, "ilcr");
             });
     </script>
 </body>
