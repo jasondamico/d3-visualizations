@@ -72,6 +72,9 @@
                     } else if (colorMethod == "ilcr") {
                         colors = d3.scaleSequential(d3.interpolateRdGy)
                             .domain([d3.max(data, d => d.ilcr), d3.min(data, d => d.ilcr)]);
+                    } else if (colorMethod == "Hispanic or Latino") {
+                        colors = d3.scaleSequential(d3.interpolatePlasma)
+                            .domain([d3.min(data, d => d["Hispanic or Latino"]), d3.max(data, d => d["Hispanic or Latino"])]);
                     }
 
                     g.selectAll("rect")
